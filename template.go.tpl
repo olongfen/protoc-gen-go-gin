@@ -7,14 +7,9 @@ type {{ $.InterfaceName }} interface {
 type ErrorFunc func(ctx *gin.Context,err interface{},status ...int)
 type SuccessFunc func(ctx *gin.Context,data interface{})
 
-type default{{ $.InterfaceName }}Resp struct{
-    Code int `json:"code"`
-    Data interface{} `json:"data"`
-    Message interface{} `json:"message"`
-}
 
 var( defaultSuccess = func(ctx *gin.Context,data interface{}){
-    ctx.AbortWithStatusJSON(200, default{{ $.InterfaceName }}Resp{Code: 0, Data: data, Message: "success"})
+    ctx.AbortWithStatusJSON(200, Response{Code: 0, Data: data, Message: "success"})
 }
 
 defaultError = func(ctx *gin.Context,err interface{},status ...int){
@@ -22,7 +17,7 @@ defaultError = func(ctx *gin.Context,err interface{},status ...int){
 	if len(status) > 0 {
 		code = status[0]
 	}
-	ctx.AbortWithStatusJSON(code, default{{ $.InterfaceName }}Resp{Code: -1, Data: nil, Message: err})
+	ctx.AbortWithStatusJSON(code, Response{Code: -1, Data: nil, Message: err})
     }
 
 )

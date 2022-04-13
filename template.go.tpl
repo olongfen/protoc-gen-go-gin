@@ -22,7 +22,7 @@ defaultError = func(ctx *gin.Context,err interface{},status ...int){
 	if len(status) > 0 {
 		code = status[0]
 	}
-	ctx.AbortWithStatusJSON(code, default{{ $.InterfaceName }}Resp{Code: -1, Data: data, Message: err})
+	ctx.AbortWithStatusJSON(code, default{{ $.InterfaceName }}Resp{Code: -1, Data: nil, Message: err})
     }
 
 )

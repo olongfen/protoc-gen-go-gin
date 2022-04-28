@@ -16,7 +16,7 @@ const (
 	ginPkg      = protogen.GoImportPath("github.com/gin-gonic/gin")
 	errPkg      = protogen.GoImportPath("errors")
 	metadataPkg = protogen.GoImportPath("google.golang.org/grpc/metadata")
-	responsePkg = protogen.GoImpoetPath("protoc-gen-go-gin/response")
+	responsePkg = protogen.GoImportPath("protoc-gen-go-gin/response")
 
 	deprecationComment = "// Deprecated: Do not use."
 )

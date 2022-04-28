@@ -12,10 +12,12 @@ import (
 )
 
 const (
-	contextPkg         = protogen.GoImportPath("context")
-	ginPkg             = protogen.GoImportPath("github.com/gin-gonic/gin")
-	errPkg             = protogen.GoImportPath("errors")
-	metadataPkg        = protogen.GoImportPath("google.golang.org/grpc/metadata")
+	contextPkg  = protogen.GoImportPath("context")
+	ginPkg      = protogen.GoImportPath("github.com/gin-gonic/gin")
+	errPkg      = protogen.GoImportPath("errors")
+	metadataPkg = protogen.GoImportPath("google.golang.org/grpc/metadata")
+	responsePkg = protogen.GoImpoetPath("protoc-gen-go-gin/response")
+
 	deprecationComment = "// Deprecated: Do not use."
 )
 

@@ -4,38 +4,7 @@ type {{ $.InterfaceName }} interface {
 {{end}}
 }
 
-type ErrorFunc func(ctx *gin.Context,err interface{},status ...int)
-type SuccessFunc func(ctx *gin.Context,data interface{})
 
-type {{ $.InterfaceName }}Resp struct{
-    Code int `json:"code"`
-    Data interface{} `json:"data"`
-    Message interface{} `json:"message"`
-}
-
-var( defaultSuccess = func(ctx *gin.Context,data interface{}){
-    ctx.AbortWithStatusJSON(200, {{ $.InterfaceName }}Resp{Code: 0, Data: data, Message: "success"})
-}
-
-defaultError = func(ctx *gin.Context,err interface{},status ...int){
-    code := 200
-	if len(status) > 0 {
-		code = status[0]
-	}
-	ctx.AbortWithStatusJSON(code, {{ $.InterfaceName }}Resp{Code: -1, Data: nil, Message: err})
-    }
-
-)
-
-
-
-func ResetSuccess(fc SuccessFunc) {
-	defaultSuccess = fc
-}
-
-func ResetError(fc ErrorFunc) {
-    defaultError = fc
-}
 
 func Register{{ $.InterfaceName }}(r gin.IRouter, srv {{ $.InterfaceName }}) {
 	s := {{.Name}}{
@@ -56,23 +25,23 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
 	var in {{.Request}}
 {{if .HasPathParams }}
 	if err := ctx.ShouldBindUri(&in); err != nil {
-		defaultError(ctx, err.Error())
+		response.Error(ctx, err.Error())
 		return
 	}
 {{end}}
 {{if eq .Method "GET" "DELETE" }}
 	if err := ctx.ShouldBindQuery(&in); err != nil {
-		defaultError(ctx, err.Error())
+		response.Error(ctx, err.Error())
 		return
 	}
 {{else if eq .Method "POST" "PUT" }}
 	if err := ctx.ShouldBindJSON(&in); err != nil {
-		defaultError(ctx, err.Error())
+		response.Error(ctx, err.Error())
 		return
 	}
 {{else}}
 	if err := ctx.ShouldBind(&in); err != nil {
-		defaultError(ctx, err.Error())
+		response.Error(ctx, err.Error())
 		return
 	}
 {{end}}
@@ -83,11 +52,11 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
 	newCtx := metadata.NewIncomingContext(ctx, md)
 	out, err := s.server.({{ $.InterfaceName }}).{{.Name}}(newCtx, &in)
 	if err != nil {
-		defaultError(ctx, err.Error())
+		response.Error(ctx, err.Error())
 		return
 	}
 
-	defaultSuccess(ctx, out)
+	response.Success(ctx, out)
 }
 {{end}}
 

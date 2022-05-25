@@ -59,33 +59,40 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 	}
 
 	for _, method := range s.Methods {
-		sd.Methods = append(sd.Methods, genMethod(method)...)
+		if len(method.Output.GoIdent.GoImportPath.String()) > 0 {
+			g.P("//", method.Output.GoIdent.GoImportPath.Ident(""))
+		}
+
+		if len(method.Input.GoIdent.GoImportPath.String()) > 0 {
+			g.P("//", method.Input.GoIdent.GoImportPath.Ident(""))
+		}
+		sd.Methods = append(sd.Methods, genMethod(method, g)...)
 	}
 	g.P(sd.execute())
 }
 
-func genMethod(m *protogen.Method) []*method {
+func genMethod(m *protogen.Method, g *protogen.GeneratedFile) []*method {
 	var methods []*method
 
 	// 存在 http rule 配置
 	rule, ok := proto.GetExtension(m.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
 	if rule != nil && ok {
 		for _, bind := range rule.AdditionalBindings {
-			methods = append(methods, buildHTTPRule(m, bind))
+			methods = append(methods, buildHTTPRule(m, bind, g))
 		}
-		methods = append(methods, buildHTTPRule(m, rule))
+		methods = append(methods, buildHTTPRule(m, rule, g))
 		return methods
 	}
 
 	// 不存在走默认流程
-	methods = append(methods, defaultMethod(m))
+	methods = append(methods, defaultMethod(m, g))
 	return methods
 }
 
 // defaultMethodPath 根据函数名生成 http 路由
 // 例如: GetBlogArticles ==> get: /blog/articles
 // 如果方法名首个单词不是 http method 映射，那么默认返回 POST
-func defaultMethod(m *protogen.Method) *method {
+func defaultMethod(m *protogen.Method, g *protogen.GeneratedFile) *method {
 	names := strings.Split(toSnakeCase(m.GoName), "_")
 	var (
 		paths      []string
@@ -117,12 +124,12 @@ func defaultMethod(m *protogen.Method) *method {
 		path = strings.Join(names[1:], "/")
 	}
 
-	md := buildMethodDesc(m, httpMethod, path)
+	md := buildMethodDesc(m, httpMethod, path, g)
 	md.Body = "*"
 	return md
 }
 
-func buildHTTPRule(m *protogen.Method, rule *annotations.HttpRule) *method {
+func buildHTTPRule(m *protogen.Method, rule *annotations.HttpRule, g *protogen.GeneratedFile) *method {
 	var (
 		path   string
 		method string
@@ -147,17 +154,17 @@ func buildHTTPRule(m *protogen.Method, rule *annotations.HttpRule) *method {
 		path = pattern.Custom.Path
 		method = pattern.Custom.Kind
 	}
-	md := buildMethodDesc(m, method, path)
+	md := buildMethodDesc(m, method, path, g)
 	return md
 }
 
-func buildMethodDesc(m *protogen.Method, httpMethod, path string) *method {
+func buildMethodDesc(m *protogen.Method, httpMethod, path string, g *protogen.GeneratedFile) *method {
 	defer func() { methodSets[m.GoName]++ }()
 	md := &method{
 		Name:    m.GoName,
 		Num:     methodSets[m.GoName],
-		Request: m.Input.GoIdent.GoName,
-		Reply:   m.Output.GoIdent.GoName,
+		Request: g.QualifiedGoIdent(m.Input.GoIdent),
+		Reply:   g.QualifiedGoIdent(m.Output.GoIdent),
 		Path:    path,
 		Method:  httpMethod,
 	}

@@ -1,4 +1,4 @@
-type {{ $.InterfaceName }} interface {
+type {{ $.InterfaceFiberName }} interface {
 {{range .MethodSet}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
 {{end}}
@@ -6,25 +6,25 @@ type {{ $.InterfaceName }} interface {
 
 
 
-func Register{{ $.InterfaceName }}(r fiber.Router, srv {{ $.InterfaceName }}) {
-	s := {{.Name}}{
+func Register{{ $.InterfaceFiberName }}(r v2.Router, srv {{ $.InterfaceFiberName }}) {
+	s := {{.Name}}Fiber{
 		server: srv,
 		router:     r,
 	}
 	s.RegisterService()
 }
 
-type {{$.Name}} struct{
-	server {{ $.InterfaceName }}
-	router fiber.Router
+type {{$.Name}}Fiber struct{
+	server {{ $.InterfaceFiberName }}
+	router v2.Router
 }
 
 
 {{range .Methods}}
-func (s *{{$.Name}}) {{ .HandlerName }} (ctx *fiber.Ctx)error {
+func (s *{{$.Name}}Fiber) {{ .HandlerName }} (ctx *v2.Ctx)error {
 	var in {{.Request}}
 {{if .HasPathParams }}
-	if err := ctx.ParamsParse(&in); err != nil {
+	if err := ctx.ParamsParser(&in); err != nil {
 		return response.FiberRespFailFunc(ctx,err.Error())
 	}
 {{end}}
@@ -33,7 +33,7 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *fiber.Ctx)error {
 		return response.FiberRespFailFunc(ctx,err.Error())
 	}
 {{else if eq .Method "DELETE"}}
-          if err := ctx.ParamsParse(&in); err != nil {
+          if err := ctx.ParamsParser(&in); err != nil {
                return response.FiberRespFailFunc(ctx,err.Error())
           }
         if err=ctx.QueryParser(&in);err!=nil{
@@ -45,11 +45,11 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *fiber.Ctx)error {
 	}
 {{end}}
 	md := metadata.New(nil)
-	for k, v := range ctx.Request.Header {
-		md.Set(k, v...)
-	}
-	newCtx := metadata.NewIncomingContext(ctx.Request.Context(), md)
-	out, err := s.server.({{ $.InterfaceName }}).{{.Name}}(newCtx, &in)
+    for k, v := range ctx.GetReqHeaders() {
+    		md.Set(k, v)
+    }
+    newCtx := metadata.NewIncomingContext(ctx.Context(), md)
+	out, err := s.server.({{ $.InterfaceFiberName }}).{{.Name}}(newCtx, &in)
 	if err != nil {
 		return  response.FiberRespFailFunc(ctx,err.Error())
 	}
@@ -58,7 +58,7 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *fiber.Ctx)error {
 }
 {{end}}
 
-func (s *{{$.Name}}) RegisterService() {
+func (s *{{$.Name}}Fiber) RegisterService() {
 {{range .Methods}}
 		s.router.Add("{{.Method}}", "{{.Path}}", s.{{ .HandlerName }})
 {{end}}

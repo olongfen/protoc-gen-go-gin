@@ -1,4 +1,4 @@
-type {{ $.InterfaceName }} interface {
+type {{ $.InterfaceGinName }} interface {
 {{range .MethodSet}}
 	{{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
 {{end}}
@@ -6,22 +6,22 @@ type {{ $.InterfaceName }} interface {
 
 
 
-func Register{{ $.InterfaceName }}(r gin.IRouter, srv {{ $.InterfaceName }}) {
-	s := {{.Name}}{
+func Register{{ $.InterfaceGinName }}(r gin.IRouter, srv {{ $.InterfaceGinName }}) {
+	s := {{.Name}}Gin{
 		server: srv,
 		router:     r,
 	}
 	s.RegisterService()
 }
 
-type {{$.Name}} struct{
-	server {{ $.InterfaceName }}
+type {{$.Name}}Gin struct{
+	server {{ $.InterfaceGinName }}
 	router gin.IRouter
 }
 
 
 {{range .Methods}}
-func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
+func (s *{{$.Name}}Gin) {{ .HandlerName }} (ctx *gin.Context) {
 	var in {{.Request}}
 {{if .HasPathParams }}
 	if err := ctx.ShouldBindUri(&in); err != nil {
@@ -57,7 +57,7 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
 		md.Set(k, v...)
 	}
 	newCtx := metadata.NewIncomingContext(ctx.Request.Context(), md)
-	out, err := s.server.({{ $.InterfaceName }}).{{.Name}}(newCtx, &in)
+	out, err := s.server.({{ $.InterfaceGinName }}).{{.Name}}(newCtx, &in)
 	if err != nil {
 		response.GinError(ctx, err.Error())
 		return
@@ -67,7 +67,7 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
 }
 {{end}}
 
-func (s *{{$.Name}}) RegisterService() {
+func (s *{{$.Name}}Gin) RegisterService() {
 {{range .Methods}}
 		s.router.Handle("{{.Method}}", "{{.Path}}", s.{{ .HandlerName }})
 {{end}}

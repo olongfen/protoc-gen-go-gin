@@ -52,9 +52,13 @@ func (s *service) execute() string {
 	return buf.String()
 }
 
-// InterfaceName service interface name
-func (s *service) InterfaceName() string {
-	return s.Name + "HTTPServer"
+// InterfaceGinName service interface name
+func (s *service) InterfaceGinName() string {
+	return s.Name + "GinHTTPServer"
+}
+
+func (s *service) InterfaceFiberName() string {
+	return s.Name + "FiberHTTPServer"
 }
 
 type method struct {

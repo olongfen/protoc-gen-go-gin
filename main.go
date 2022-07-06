@@ -18,7 +18,7 @@ func main() {
 	}
 
 	var flags flag.FlagSet
-	flags.Int("frame", 1, "default 1, 1 gen by frame gin, 2 gen by frame fiber")
+	mode := flags.String("frame", "gin", "frame: gin, fiber; --frame=gin")
 	options := protogen.Options{
 		ParamFunc: flags.Set,
 	}
@@ -29,7 +29,7 @@ func main() {
 			if !f.Generate {
 				continue
 			}
-			generateFile(gen, f, 2)
+			generateFile(gen, f, FrameMode(*mode))
 		}
 		return nil
 	})

@@ -48,7 +48,7 @@ func (s *{{$.Name}}Fiber) {{ .HandlerName }} (ctx *v2.Ctx)error {
     for k, v := range ctx.GetReqHeaders() {
     		md.Set(k, v)
     }
-    newCtx := metadata.NewIncomingContext(ctx.Context(), md)
+    newCtx := metadata.NewIncomingContext(ctx.UserContext(), md)
 	out, err := s.server.({{ $.InterfaceFiberName }}).{{.Name}}(newCtx, &in)
 	if err != nil {
 		return  response.FiberRespFailFunc(ctx,err.Error())

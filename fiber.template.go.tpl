@@ -10,6 +10,7 @@ func Register{{ $.InterfaceFiberName }}(r v2.Router, srv {{ $.InterfaceFiberName
 	s := {{.Name}}Fiber{
 		server: srv,
 		router:     r,
+		validate: v10.New(),
 	}
 	s.RegisterService()
 }
@@ -17,6 +18,7 @@ func Register{{ $.InterfaceFiberName }}(r v2.Router, srv {{ $.InterfaceFiberName
 type {{$.Name}}Fiber struct{
 	server {{ $.InterfaceFiberName }}
 	router v2.Router
+	validate *v10.Validate
 }
 
 
@@ -44,6 +46,10 @@ func (s *{{$.Name}}Fiber) {{ .HandlerName }} (ctx *v2.Ctx)error {
 		  return response.FiberRespFailFunc(ctx,err.Error())
 	}
 {{end}}
+    err := s.validate.Struct(in)
+    if err != nil {
+    	return response.FiberRespFailFunc(ctx,err.Error())
+    }
 	md := metadata.New(nil)
     for k, v := range ctx.GetReqHeaders() {
     		md.Set(k, v)

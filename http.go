@@ -15,6 +15,7 @@ const (
 	contextPkg  = protogen.GoImportPath("context")
 	ginPkg      = protogen.GoImportPath("github.com/gin-gonic/gin")
 	fiberPkg    = protogen.GoImportPath("github.com/gofiber/fiber/v2")
+	validate = protogen.GoImportPath("github.com/go-playground/validator/v10")
 	errPkg      = protogen.GoImportPath("errors")
 	metadataPkg = protogen.GoImportPath("google.golang.org/grpc/metadata")
 	responsePkg = protogen.GoImportPath("github.com/olongfen/protoc-gen-go-http-frame/response")
@@ -56,6 +57,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File, mode FrameMode) *pr
 		g.P("//", ginPkg.Ident(""))
 	case fiber:
 		g.P("//", fiberPkg.Ident(""))
+		g.P("//",validate.Ident(""))
 
 	}
 

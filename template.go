@@ -8,14 +8,17 @@ import (
 	"strings"
 )
 
-//go:embed template.go.tpl
+//go:embed gin.template.go.tpl
 var tpl string
 
-type service struct {
-	Name     string // Greeter
-	FullName string // helloworld.Greeter
-	FilePath string // api/helloworld/helloworld.proto
+//go:embed fiber.template.go.tpl
+var fiberTpl string
 
+type service struct {
+	Name      string // Greeter
+	FullName  string // helloworld.Greeter
+	FilePath  string // api/helloworld/helloworld.proto
+	mode      FrameMode
 	Methods   []*method
 	MethodSet map[string]*method
 }
@@ -29,7 +32,17 @@ func (s *service) execute() string {
 		}
 	}
 	buf := new(bytes.Buffer)
-	tmpl, err := template.New("http").Parse(strings.TrimSpace(tpl))
+	var (
+		tmpl *template.Template
+		err  error
+	)
+	switch s.mode {
+	default:
+		tmpl, err = template.New("http").Parse(strings.TrimSpace(tpl))
+	case fiber:
+		tmpl, err = template.New("http").Parse(strings.TrimSpace(fiberTpl))
+	}
+
 	if err != nil {
 		panic(err)
 	}

@@ -25,30 +25,30 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
 	var in {{.Request}}
 {{if .HasPathParams }}
 	if err := ctx.ShouldBindUri(&in); err != nil {
-		response.Error(ctx, err.Error())
+		response.GinError(ctx, err.Error())
 		return
 	}
 {{end}}
 {{if eq .Method "GET" }}
 	if err := ctx.ShouldBindQuery(&in); err != nil {
-		response.Error(ctx, err.Error())
+		response.GinError(ctx, err.Error())
 		return
 	}
 {{else if eq .Method "DELETE"}}
     if err := ctx.ShouldBindQuery(&in); err != nil {
     		if err=ctx.ShouldBind(&in);err!=nil{
-    		    response.Error(ctx, err.Error())
+    		    response.GinError(ctx, err.Error())
     		    return
     		}
     }
 {{else if eq .Method "POST" "PUT" }}
 	if err := ctx.ShouldBindJSON(&in); err != nil {
-		response.Error(ctx, err.Error())
+		response.GinError(ctx, err.Error())
 		return
 	}
 {{else}}
 	if err := ctx.ShouldBind(&in); err != nil {
-		response.Error(ctx, err.Error())
+		response.GinError(ctx, err.Error())
 		return
 	}
 {{end}}
@@ -59,11 +59,11 @@ func (s *{{$.Name}}) {{ .HandlerName }} (ctx *gin.Context) {
 	newCtx := metadata.NewIncomingContext(ctx.Request.Context(), md)
 	out, err := s.server.({{ $.InterfaceName }}).{{.Name}}(newCtx, &in)
 	if err != nil {
-		response.Error(ctx, err.Error())
+		response.GinError(ctx, err.Error())
 		return
 	}
 
-	response.Success(ctx, out)
+	response.GinSuccess(ctx, out)
 }
 {{end}}
 

@@ -10,14 +10,15 @@ import (
 
 func main() {
 	showVersion := flag.Bool("version", false, "print the version and exit")
+
 	flag.Parse()
 	if *showVersion {
-		fmt.Printf("protoc-gen-go-gin %v\n", release)
+		fmt.Printf("protoc-gen-go-http-frame %v\n", release)
 		return
 	}
 
 	var flags flag.FlagSet
-
+	flags.Int("frame", 1, "default 1, 1 gen by frame gin, 2 gen by frame fiber")
 	options := protogen.Options{
 		ParamFunc: flags.Set,
 	}
@@ -28,7 +29,7 @@ func main() {
 			if !f.Generate {
 				continue
 			}
-			generateFile(gen, f)
+			generateFile(gen, f, 2)
 		}
 		return nil
 	})

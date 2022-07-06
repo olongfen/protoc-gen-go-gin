@@ -1,1 +1,1 @@
-# protoc-gen-go-gin
+# protoc-gen-go-http-frame
